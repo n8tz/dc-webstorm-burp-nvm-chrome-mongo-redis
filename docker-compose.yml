@@ -12,6 +12,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       #      - "--docker.domain=localhost"
+      - "--entrypoints.proxy.address=:8080"
       - "--entrypoints.web.address=:80"
     ports:
       - "80:80"
@@ -31,16 +32,18 @@ services:
     
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.proxy.rule=Host(`${PROXY_DOMAIN:-burp.localhost}`)"
+      - "traefik.http.routers.proxy.address=:8080"
+      - "traefik.http.routers.proxy.entrypoints=proxy"
       - "traefik.http.routers.app.rule=Host(`${APP_DOMAIN:-app.localhost}`)"
       - "traefik.http.routers.app.entrypoints=web"
-      - "traefik.http.routers.static.rule=Host(`static.${APP_DOMAIN:-app.localhost}`)"
-      - "traefik.http.routers.static.entrypoints=web"
+      - "traefik.http.routers.proxy.address=:80"
       - 'traefik.protocol=http'
     environment:
       - node-options="--max-old-space-size=4096"
       - MONGO_URI=mongodb://mongodb:27017
       - REDIS_URI=redis://redis:6379
-      - DISPLAY=192.168.150.24:0.0
+      - DISPLAY=${WORKSPACE:-192.168.150.24:0.0}
     #      - CHOKIDAR_USEPOLLING=true
     links:
       - mongodb
