@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:19.10
 
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh

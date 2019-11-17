@@ -5,17 +5,37 @@ volumes:
   emptyDockerDir:
 networks:
   app_network:
-services:
-  
+services:  
+  traefik:
+    image: "traefik:2.0"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      #      - "--docker.domain=localhost"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - app_network
+      
   workspace:
     #restart: always
     build:
       context: .
     working_dir: /home/workspace
     #    command: bash -c "npm i&&wi-run :dev start"
-    command: wstorm
+    #command: wstorm
     #
     
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`${APP_DOMAIN:-app.localhost}`)"
+      - "traefik.http.routers.app.entrypoints=web"
+      - "traefik.http.routers.static.rule=Host(`static.${APP_DOMAIN:-app.localhost}`)"
+      - "traefik.http.routers.static.entrypoints=web"
+      - 'traefik.protocol=http'
     environment:
       - node-options="--max-old-space-size=4096"
       - MONGO_URI=mongodb://mongodb:27017
@@ -29,7 +49,7 @@ services:
       - mongodb
       - redis
     volumes:
-      - ..:/home/workspace
+      - ${WORKSPACE:-..}:/home/workspace
       - node_modules:/home/workspace/node_modules
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 #      - /tmp/.X11-unix:/tmp/.X11-unix

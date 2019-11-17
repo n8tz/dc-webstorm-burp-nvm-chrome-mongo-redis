@@ -1,0 +1,14 @@
+{
+  "name": "dc-node-dev-stack",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "Nathan Braun <n8tz.js@gmail.com>",
+  "scripts": {    
+    "start": "docker-compose up",
+    "restart": "docker-compose up --build",
+    "runBrowser": "start http://localhost:8080"
+  },
+  "dependencies": {
+   
+  }
+}
