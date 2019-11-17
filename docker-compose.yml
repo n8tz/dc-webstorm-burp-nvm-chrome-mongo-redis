@@ -1,0 +1,67 @@
+version: '3'
+volumes:
+  node_modules:
+  builds:
+  emptyDockerDir:
+networks:
+  app_network:
+services:
+  
+  workspace:
+    #restart: always
+    build:
+      context: .
+    working_dir: /home/workspace
+    #    command: bash -c "npm i&&wi-run :dev start"
+    command: wstorm
+    #
+    
+    environment:
+      - node-options="--max-old-space-size=4096"
+      - MONGO_URI=mongodb://mongodb:27017
+      - REDIS_URI=redis://redis:6379
+      - DISPLAY=192.168.150.24:0.0
+    #      - CHOKIDAR_USEPOLLING=true
+    links:
+      - mongodb
+      - redis
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ..:/home/workspace
+      - node_modules:/home/workspace/node_modules
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#      - /tmp/.X11-unix:/tmp/.X11-unix
+    expose:
+      - "8080"
+#    ports:
+#      - "${APP_DOCKER_DEBUG_PORT:-9229}:9229"
+    #      - "9090:9090"
+    networks:
+      - app_network  
+  mongodb:
+    image: mongo
+    restart: always
+    command: --quiet
+    environment:
+      - MONGO_DATA_DIR=/data/mongodb
+    volumes:
+      - ../../docker-data/mongodb:/data
+    expose:
+      - 27017
+    #    ports:
+    #      - "27017"
+    networks:
+      - app_network
+  redis:
+    image: redis:4.0.5-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    restart: always
+    expose:
+      - 6379
+    networks:
+      - app_network
+    volumes:
+      - ../../docker-data/redis-data:/data
