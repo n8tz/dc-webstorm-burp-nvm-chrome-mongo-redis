@@ -25,6 +25,7 @@ services:
     #restart: always
     build:
       context: .
+    shm_size: '2gb'
     working_dir: /home/workspace
     #    command: bash -c "npm i&&wi-run :dev start"
     #command: wstorm
